@@ -1,0 +1,8 @@
+#!/bin/bash
+TS="-2 days"
+[ ! -z "$1" ] && TS="$1"
+~/bin/getlsfacct -u supermod -b "$(date -d "$TS" +%s)" -r jsmgt1.ucar.edu -v  -p '/ncar/opt/lsf/work/jellystone/logdir/archive/' --resources "{'jellystone': '/^js/', 'booboo': '/^bo/', 'yogi': '/^(yo|yg)/', 'fawn': '/^fawn/'}"
+~/bin/getlsfacct -u supermod -b "$(date -d "$TS" +%s)" -r ermgt1.ucar.edu -v  -p '/ncar/opt/lsf/work/erebus/logdir/archive/' --resources "{'erebus': '/^er/'}"
+~/bin/getlsfacct -u supermod -b "$(date -d "$TS" +%s)" -r ysmgt1.ucar.edu -v  -p '/ncar/opt/lsf/work/yellowstone/logdir/archive/' --resources "{'yellowstone': '/^ys/', 'caldera': '/^ca/', 'geyser': '/^(ge|gy)/', 'glade': '/^glade/', 'pronghorn': '/^pr/'}"
+#~/bin/getpbsacct -u supermod -b "$(date -d "$TS" +%s)" -r laadmin1.ucar.edu -v  -p '/gpfs/pbs/server_priv/accounting/' --resources "{'laramie': '/^r*/','flash': '/^flash/'}" 
+~/bin/getpbsacct -u supermod -b "$(date -d "$TS" +%s)" -r chadmin1.ucar.edu -v  -p '/gpfs/pbs/server_priv/accounting/' --resources "{'cheyenne': '/^r*/'}"
