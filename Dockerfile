@@ -5,7 +5,12 @@ LABEL repo=cisl-repo \
       name=xdmod_cisl_logingest \
       version=1.0
 
+RUN yum -y install \
+    python-yaml
+
 WORKDIR $HOME
 COPY bin/* bin/
+
+EXPOSE 25
 
 CMD [ "dailyLogIngest" ]
