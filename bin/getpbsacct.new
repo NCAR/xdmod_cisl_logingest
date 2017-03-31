@@ -59,7 +59,7 @@ parser.add_argument('-r','--host',  dest='host', help='host to collect logs from
 parser.add_argument('-p','--path',  dest='path', help='path to accounting files on remote host', required=True)
 parser.add_argument('--resources',  dest='resources', help='yaml dictonary of resource => regex EX: "{\'yellowstone\': \'/^ys/\'}"', required=True, type=yaml.load)
 parser.add_argument('--email',  dest='email', help='who to email on failure', required=False, default='root')
-parser.add_argument('--tmpdir',  dest='tmpdir', help='temporary file directory', required=False, default='/var/tmp')
+#parser.add_argument('--tmpdir',  dest='tmpdir', help='temporary file directory', required=False, default='/var/tmp')
 parser.add_argument('-v','--verbose',   dest='verbose', help='Be verbose', action="store_true", required=False)
 args = parser.parse_args()
 
@@ -67,7 +67,7 @@ args = parser.parse_args()
 LOCK = open('/var/run/getlsfacct', 'a')
 fcntl.flock(LOCK.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-tempdir = tempfile.mkdtemp('','',args.tmpdir);
+tmpdir = tempfile.mkdtemp();
 
 try:
     begintime	= datetime.datetime.fromtimestamp(int(args.begintime))
@@ -81,31 +81,31 @@ try:
 	msg('Report time: {0} ({1})'.format(reporttime.strftime('%c'), reportfile));
 
 	try:
-	    ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/%s' % (args.path, reportfile), tempdir);
+	    ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/%s' % (args.path, reportfile), tmpdir);
 	    if ret[0] == 0:
 		for (resname, resregex)  in args.resources.items():
 		    try:
-			ret = exec_to_syslog (['/usr/bin/xdmod-shredder', '-v', '-r', resname, '-f', 'pbs', '-i', reportfile, '--host-filter', resregex], tempdir);
+			ret = exec_to_syslog (['/usr/bin/xdmod-shredder', '-v', '-r', resname, '-f', 'pbs', '-i', reportfile, '--host-filter', resregex], tmpdir);
 			if ret[0] != 0:
 			    raise ValueError("Error: shredder failed  {0}\nstderr:\n{1}".format(reportfile, ret[0], ret[1]))
 
-			ret = exec_to_syslog (['/usr/bin/xdmod-ingestor', '-v'], tempdir);
+			ret = exec_to_syslog (['/usr/bin/xdmod-ingestor', '-v'], tmpdir);
 			if ret[0] != 0:
 			    raise ValueError("Error: ingestor failed  {0}\nstderr:\n{1}".format(reportfile, ret[0], ret[1]))
 
 		    except Exception as exception:
 			msg(exception);
-			ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbscct shred/ingest failure', args.email], str(exception), tempdir );
+			ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbscct shred/ingest failure', args.email], str(exception), tmpdir );
 
 	except Exception as exception:
 	    msg(exception);
-	    ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbscct failure', args.email], str(exception), tempdir );
+	    ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbscct failure', args.email], str(exception), tmpdir );
 
 except Exception as exception:
 	msg(exception);
-	ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbsacct failure', args.email], str(exception), tempdir );
+	ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbsacct failure', args.email], str(exception), tmpdir );
 
 # cleanup temp dir
-shutil.rmtree(tempdir);
+shutil.rmtree(tmpdir);
 
 

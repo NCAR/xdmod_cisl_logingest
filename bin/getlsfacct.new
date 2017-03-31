@@ -58,7 +58,7 @@ parser.add_argument('-r','--host',  dest='host', help='host to collect logs from
 parser.add_argument('-p','--path',  dest='path', help='path to accounting files on remote host', required=True)
 parser.add_argument('--resources',  dest='resources', help='yaml dictonary of resource => regex EX: "{\'yellowstone\': \'/^ys/\'}"', required=True, type=yaml.load)
 parser.add_argument('--email',  dest='email', help='who to email on failure', required=False, default='root')
-parser.add_argument('--tmpdir',  dest='tmpdir', help='temporary file directory', required=False, default='/var/tmp')
+#parser.add_argument('--tmpdir',  dest='tmpdir', help='temporary file directory', required=False, default='/var/tmp')
 parser.add_argument('-v','--verbose',   dest='verbose', help='Be verbose', action="store_true", required=False)
 args = parser.parse_args()
 
@@ -66,10 +66,10 @@ args = parser.parse_args()
 LOCK = open('/var/run/getlsfacct', 'a')
 fcntl.flock(LOCK.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-tempdir = tempfile.mkdtemp('','',args.tempdir);
+tmpdir = tempfile.mkdtemp();
 
 try:
-	ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/archive.log' % (args.path), tempdir);
+	ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/archive.log' % (args.path), tmpdir);
 	if ret[0] == 0:
 		begintime   = datetime.datetime.fromtimestamp(int(args.begintime))
 		endtime	    = datetime.datetime.fromtimestamp(int(args.endtime))
@@ -82,7 +82,7 @@ try:
 			(?P<file>lsb.acct.\d+.(?P<timestamp>\d+))
 		""", re.VERBOSE) 
 	
-		with open('%s/archive.log' % (tempdir),'r') as arcfile:
+		with open('%s/archive.log' % (tmpdir),'r') as arcfile:
 		    for line in arcfile:
 	               match = archive_regex.match(line)
 		       if match:
@@ -90,16 +90,16 @@ try:
 			   afilename = match.group('file')
 			   if ts >= begintime and ts <= endtime:
 			        try:
-				    ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/%s' % (args.path, afilename), tempdir );
+				    ret = exec_to_string_with_input (['/usr/bin/sftp', '%s@%s' % (args.user, args.host)], 'get %s/%s' % (args.path, afilename), tmpdir );
 				    if ret[0] == 0:
-					ret = exec_to_string_with_input (['/usr/bin/md5sum', '-c', '-'], "%s  %s/%s" % (match.group('hash'), tempdir, afilename), tempdir );
+					ret = exec_to_string_with_input (['/usr/bin/md5sum', '-c', '-'], "%s  %s/%s" % (match.group('hash'), tmpdir, afilename), tmpdir );
 					if ret[0] == 0:
 					    for (resname, resregex)  in args.resources.items():
-						ret = exec_to_syslog (['/usr/bin/xdmod-shredder', '-v', '-r', resname, '-f', 'lsf', '-i', afilename, '--host-filter', resregex], tempdir);
+						ret = exec_to_syslog (['/usr/bin/xdmod-shredder', '-v', '-r', resname, '-f', 'lsf', '-i', afilename, '--host-filter', resregex], tmpdir);
 						if ret[0] != 0:
 						    raise ValueError("Error: shredder failed  %s\nstderr:\n%s" % (afilename, ret[0], ret[1]))
 
-					    ret = exec_to_syslog (['/usr/bin/xdmod-ingestor', '-v'], tempdir);
+					    ret = exec_to_syslog (['/usr/bin/xdmod-ingestor', '-v'], tmpdir);
 					    if ret[0] != 0:
 						raise ValueError("Error: ingestor failed  %s\nstderr:\n%s" % (afilename, ret[0], ret[1]))
 
@@ -109,15 +109,15 @@ try:
 					raise ValueError("Error: %s unable to retrieve %s\nstderr:\n%s" % (afilename, ret[0], ret[2]))
 				except Exception as exception:
 					msg(exception);
-					ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tempdir );
+					ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tmpdir );
 
 	else:
 		raise ValueError("Error: %s unable to retrieve archive.log\nstderr:\n%s" % (ret[0], ret[2]))
 except Exception as exception:
 	msg(exception);
-	ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tempdir );
+	ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tmpdir );
 
 # cleanup temp dir
-shutil.rmtree(tempdir);
+shutil.rmtree(tmpdir);
 
 

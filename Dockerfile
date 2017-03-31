@@ -5,12 +5,19 @@ LABEL repo=cisl-repo \
       name=xdmod_cisl_logingest \
       version=1.0
 
-RUN yum -y install \
-    python-yaml
-
 WORKDIR $HOME
 COPY bin/* bin/
 
-EXPOSE 25
+# dailyLogIngest cron script
+ADD dailyLogIngest.cron  /etc/cron.d/dailyLogIngest.cron 
+RUN chmod 644 /etc/cron.d/dailyLogIngest.cron 
+RUN chmod 1777 /var/run
 
-CMD [ "dailyLogIngest" ]
+
+# dailyLogIngest log directory
+RUN echo /var/log/dailylogingest >> /etc/deploy-env-dirs.cnf
+# 
+# Disable strict host key checking
+ADD runcron.sh /
+
+CMD [ "/runcron.sh" ]
