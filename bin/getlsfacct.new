@@ -97,22 +97,22 @@ try:
 					    for (resname, resregex)  in args.resources.items():
 						ret = exec_to_syslog (['/usr/bin/xdmod-shredder', '-v', '-r', resname, '-f', 'lsf', '-i', afilename, '--host-filter', resregex], tmpdir);
 						if ret[0] != 0:
-						    raise ValueError("Error: shredder failed  %s\nstderr:\n%s" % (afilename, ret[0], ret[1]))
+						    raise ValueError("Error: shredder failed  {0}\nstderr:\n{1}".format(afilename, ret[0], ret[1]))
 
 					    ret = exec_to_syslog (['/usr/bin/xdmod-ingestor', '-v'], tmpdir);
 					    if ret[0] != 0:
-						raise ValueError("Error: ingestor failed  %s\nstderr:\n%s" % (afilename, ret[0], ret[1]))
+						raise ValueError("Error: ingestor failed  {0}\nstderr:\n{1}".format(afilename, ret[0], ret[1]))
 
 					else:
-					    raise ValueError("Error: bad checksum %s unable to retrieve %s\nstderr:\n%s" % (afilename, ret[0], ret[2]))
+					    raise ValueError("Error: bad checksum {0} unable to retrieve {1}\nstderr:\n{2}".format(afilename, ret[0], ret[2]))
 				    else:
-					raise ValueError("Error: %s unable to retrieve %s\nstderr:\n%s" % (afilename, ret[0], ret[2]))
+					raise ValueError("Error: {0} unable to retrieve {1}\nstderr:\n{2}".format(afilename, ret[0], ret[2]))
 				except Exception as exception:
 					msg(exception);
 					ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tmpdir );
 
 	else:
-		raise ValueError("Error: %s unable to retrieve archive.log\nstderr:\n%s" % (ret[0], ret[2]))
+		raise ValueError("Error: {0} unable to retrieve archive.log\nstderr:\n{1}".format(ret[0], ret[2]))
 except Exception as exception:
 	msg(exception);
 	ret = exec_to_string_with_input (['/bin/mail', '-s', 'getlsfacct failure', args.email], str(exception), tmpdir );
