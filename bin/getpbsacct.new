@@ -76,7 +76,6 @@ try:
     msg('Begintime: {0} Endtime: {1}'.format(begintime.strftime('%c'), endtime.strftime('%c')));
 
     while reporttime < endtime:
-	reporttime += datetime.timedelta(days=1);
 	reportfile = reporttime.strftime('%Y%m%d')
 	msg('Report time: {0} ({1})'.format(reporttime.strftime('%c'), reportfile));
 
@@ -100,6 +99,8 @@ try:
 	except Exception as exception:
 	    msg(exception);
 	    ret = exec_to_string_with_input (['/bin/mail', '-s', 'getpbscct failure', args.email], str(exception), tmpdir );
+
+	reporttime += datetime.timedelta(days=1);
 
 except Exception as exception:
 	msg(exception);
