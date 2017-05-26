@@ -1,1 +1,1 @@
-0 2 * * * xdmod /home/xdmod/bin/cronjob.new >> /var/log/dailylogingest/dailyLogIngest.log 2>&1
+0 3 * * * xdmod /home/xdmod/bin/cronjob.new >> /var/log/dailylogingest/dailyLogIngest.log 2>&1
