@@ -1,8 +1,8 @@
-FROM cisl-repo/xdmod_cisl_base:1.1
-ENV REFRESHED_AT 2017-07-12
+FROM cisl-repo/xdmod_cisl_base:1.2
+ENV REFRESHED_AT 2017-07-20
 LABEL repo=cisl-repo \
       name=xdmod_cisl_logingest \
-      version=1.1
+      version=1.2
 
 WORKDIR $HOME
 COPY bin/* bin/
