@@ -8,7 +8,11 @@ SLEEP_SECS=300
 RETRY_DELAY_MINUTES=60
 
 tstamp=$(date '+%Y-%m-%d %H:%M:%S')
-echo "Starting logingest loop in $RSRCLOGS_DIR..."
+echo "$tstamp Starting logingest loop in $RSRCLOGS_DIR..."
+while [[ ! -d $RSRCLOGS_DIR ]] ; do
+    echo "$RSRCLOGS_DIR: no such directory" >&2
+    sleep $SLEEP_SECS
+done
 cd $RSRCLOGS_DIR || exit 1
 while true ; do
     tstamp=$(date '+%Y-%m-%d %H:%M:%S')
