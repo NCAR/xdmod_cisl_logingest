@@ -1,10 +1,10 @@
 FROM cisl-repo/xdmod_cisl_base:1.5
-ENV REFRESHED_AT 2017-12-04
+ENV REFRESHED_AT 2017-12-05
 LABEL repo=cisl-repo \
       name=xdmod_cisl_logingest \
       version=1.5
 
-COPY dailyLogIngestRunner.sh logingest.sh ./
+COPY dailyLogIngest.sh run-shredder.sh run-ingestor.sh ./
 
 VOLUME /var/cisl_acct_log
-CMD [ "./dailyLogIngestRunner.sh" ]
+CMD [ "./dailyLogIngest.sh" ]
