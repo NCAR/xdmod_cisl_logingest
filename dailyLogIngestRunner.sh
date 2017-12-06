@@ -16,7 +16,7 @@ done
 cd $RSRCLOGS_DIR || exit 1
 while true ; do
     tstamp=$(date '+%Y-%m-%d %H:%M:%S')
-    find . -type f +amin +$RETRY_DELAY_MINUTES \
+    find . -type f -amin +$RETRY_DELAY_MINUTES \
            -name [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].rejected -print |
     while read rejpath ; do
         path="${rejpath%.rejected}"
