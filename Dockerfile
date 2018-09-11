@@ -1,4 +1,4 @@
-FROM cisl-repo/xdmod_cisl_base:1.5
+FROM cisl-repo/xdmod_cisl_base:1.6
 ENV REFRESHED_AT 2017-12-05
 LABEL repo=cisl-repo \
       name=xdmod_cisl_logingest \
