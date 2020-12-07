@@ -2,7 +2,8 @@
 VOL_LOGS="${VOL_LOGS:-/var/log}"
 VOL_ACCT_DATA="${VOL_ACCT_DATA:-/var/cisl_acct_log}"
 BASEDIR="${BASEDIR:-$VOL_ACCT_DATA/acctlogs}"
-RSRCLOGS_DIR="$BASEDIR/resources-xdmod.d"
+RSRCLOGS_DIR="$BASEDIR/resources-auto.d"
+RSRCLOGS_TAR_DIR="${RSRCLOGS_DIR}/logs-tar.d"
 INGEST_FLAG="$BASEDIR/ingest-pending"
 SHREDDER=/home/xdmod/run-shredder.sh
 INGESTOR=/home/xdmod/run-ingestor.sh
@@ -25,8 +26,15 @@ while true ; do
            -name [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].rejected -print |
     while read rejpath ; do
         path="${rejpath%.rejected}"
-	echo "$tstamp Retrying previously rejected file: $path"
-	mv "$rejpath" "$path"
+        echo "$tstamp Retrying previously rejected file: $path"
+        mv "$rejpath" "$path"
+    done
+
+    find ${RSRCLOGS_TAR_DIR} -type f -name '*.tar' -print |
+    while read tarpath ; do
+        tstamp=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "$tstamp Extracting tar file: $path"
+        tar xf "$path" && rm -f "$path"
     done
 
     find . -type f -name [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] -print |
@@ -41,7 +49,7 @@ while true ; do
                 tstamp=$(date '+%Y-%m-%d %H:%M:%S')
                 echo "$tstamp Error (rc=$rc) from: rm -f $path" >&2
             fi
-	    touch $INGEST_FLAG
+            touch $INGEST_FLAG
         else
             echo "$tstamp Renaming $path for later retry"
             mv "$path" "$path.rejected"
